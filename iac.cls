@@ -12,7 +12,7 @@
 \RequirePackage{graphicx}
 %\RequirePackage{array}
 \RequirePackage{booktabs}
-\RequirePackage{overcite}
+%\RequirePackage{overcite}
 \RequirePackage{lastpage}
 \RequirePackage{fancyhdr}
 \RequirePackage{lastpage}
@@ -20,26 +20,30 @@
 \RequirePackage[normalem]{ulem}
 \RequirePackage{etoolbox}
 \RequirePackage{alphalph}
+\RequirePackage{mathtools}
+
 
 \renewcommand{\headrulewidth}{0pt}
 
 \newcounter{authcount}
 \newcommand{\IACauthor}[2]{%
-	\stepcounter{authcount}%
-	\csdef{iac@author\theauthcount}{#1}%
-	\csdef{iac@affiliation\theauthcount}{#2}}
+  \stepcounter{authcount}%
+  \csdef{iac@author\theauthcount}{#1}%
+  \csdef{iac@affiliation\theauthcount}{#2}%
+}
 
 \setlength\parindent{12pt}
 \RequirePackage[]{caption}
-\captionsetup[figure]{name=Fig.,format=hang,indention=-20pt}
-\captionsetup[table]{format=hang,indention=-24pt}
+\captionsetup[figure]{name=Fig.,format=plain,indention=0pt}
+\captionsetup[table]{format=plain,indention=0pt,position=above}
 
 \titlespacing{\section}{0pt}{*3}{*1.5}
 \titlespacing{\subsection}{0pt}{*2.5}{*0.5}
 \titlespacing{\subsubsection}{12pt}{*2}{*0.5}
-\titleformat{\section}{\centering\normalfont}{\Roman{section}. }{0.5em}{\uline{\textsc{#1}}}
-\titleformat{\subsection}{\normalfont}{\Roman{section}.\roman{subsection}}{0.5em}{\uline{#1}}
-\titleformat{\subsubsection}{\normalfont}{}{0pt}{\uline{#1}}
+\titleformat{name=\section,numberless}{\normalfont}{\Roman{section}. }{0.5em}{\textbf{#1}}
+\titleformat{\section}{\normalfont}{\Roman{section}. }{0.5em}{\textbf{\thesection{}. #1}}
+\titleformat{\subsection}{\normalfont}{}{0.5em}{\emph{\thesubsection{} #1}}
+\titleformat{\subsubsection}{\normalfont}{}{0.5em}{\emph{\thesubsubsection{} #1}}
 
 \renewcommand{\abstract}[1]{\def\iac@abstract{#1}}
 \newcommand*{\IACpaperyear}[1]{\def\iac@paperyear{#1}}\IACpaperyear{}
@@ -47,6 +51,8 @@
 \newcommand*{\IACconference}[1]{\def\iac@conference{#1}}\IACconference{}
 \newcommand*{\IACcopyright}[1]{\def\iac@copyright{#1}}\IACcopyright{}
 \newcommand*{\IAClocation}[1]{\def\iac@location{#1}}\IAClocation{}
+\newcommand*{\IACdate}[1]{\def\iac@date{#1}}\IACdate{}
+\newcommand*{\IACkeywords}[1]{\def\iac@keywords{#1}}\IACpaperyear{}
 
 \newcommand{\IACcopyrightA}[2]{\def\iac@copyright{Copyright \copyright\,#1 by #2. All rights reserved.}}
 \newcommand{\IACcopyrightB}[2]{\def\iac@copyright{Copyright \copyright\,#1 by #2. Published by the International Astronautical Federation with permission.}}
@@ -57,7 +63,8 @@
 
 \renewcommand\maketitle{\twocolumn[
   \begin{@twocolumnfalse}
-  \lhead{}\chead{\footnotesize \iac@conference th International Astronautical Congress, {\iac@location}. \iac@makecopyright}\rhead{}%
+    \lhead{}\chead{\footnotesize \iac@conference th International Astronautical Congress (IAC), {\iac@location}, {\iac@date}.\\ %\iac@makecopyright
+    }\rhead{}%
   \lfoot{IAC--\iac@paperyear--\iac@papernumber}\cfoot{}\rfoot{Page \thepage\ of \pageref{LastPage}}%
   \begingroup
     \global\@topnum\z@   % Prevents figures from going at top of page.
@@ -78,7 +85,7 @@
   \begin{center}%
     IAC--\iac@paperyear--\iac@papernumber\par%
     \vskip1em
-    {\large \textsc{\@title} \par}%
+    {\large \textbf{\@title} \par}%
     \vskip 1.5em%
     {\large
       \lineskip .5em%
@@ -87,15 +94,38 @@
       \whileboolexpr
       { test {\ifnumcomp{\value{authnum}}{<}{\theauthcount}} }%
       {\stepcounter{authnum}%
-      	\normalsize\textbf{\csuse{iac@author\theauthnum}}\par%
-		\normalsize\csuse{iac@affiliation\theauthnum}\par%
-		\vskip 1.5ex%
-	  }%
+      	\normalsize\textbf{\csuse{iac@author\theauthnum}}
+        \ifboolexpr
+        { test {\ifnumcomp{\value{authnum}}{>}{1}} }%
+        {\textsuperscript{\hspace{-0.25em}{\alph{authnum}}}}{\textsuperscript{\hspace{-0.25em}{\alph{authnum}}*}}
+        \ifboolexpr
+        { test {\ifnumcomp{\value{authnum}}{<}{\theauthcount}} }%
+        {\hspace{-0.5em},}{}
+      }%
+      \par \vskip 1.5em
+      \begin{flushleft}
+      \setcounter{authnum}{0}
+      \whileboolexpr
+      { test {\ifnumcomp{\value{authnum}}{<}{\theauthcount}} }%
+      {\stepcounter{authnum}%
+        \emph{ \textsuperscript{{\alph{authnum}}} \csuse{iac@affiliation\theauthnum}}
+        \ifboolexpr
+        { test {\ifnumcomp{\value{authnum}}{<}{\theauthcount}} }%
+        {\par}{}
+      }%
+      \par
+      \textsuperscript{*}Corresponding Author
+      \end{flushleft}
     }%
+    \par
+    \textbf{Abstract}
   \end{center}%
-  \indent\iac@abstract\par%
-  \vskip 4.5ex}%
-  \pagestyle{fancy}%
+  \indent \iac@abstract\par%
+  \textbf{Keywords:} \iac@keywords\par
+  \vskip 4.5ex%
+}%
+\pagestyle{fancy}%
+
   
 \makeatletter
 \newcommand*{\fnsymbolsingle}[1]{%
@@ -117,6 +147,6 @@
   \fnsymbolmult{\value{footnote}}%
 }
 \makeatletter
-	\def\tagform@#1{\maketag@@@{[#1]\@@italiccorr}}
+	\def\tagform@#1{\maketag@@@{(#1)\@@italiccorr}}
 \makeatother
 \endinput

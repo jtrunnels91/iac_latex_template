@@ -2,5 +2,8 @@
 *.log
 *.aux
 *.synctex.gz*
+*.aux
+*.blg
+*.log
 *~
 TAGS
